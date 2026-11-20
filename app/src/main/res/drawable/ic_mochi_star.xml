@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mochi mascot: transparent foreground so custom launcher colours remain visible. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:pathData="M28,52 C28,17 80,17 80,52" android:fillColor="@android:color/transparent" android:strokeColor="#9A86B6" android:strokeWidth="5" android:strokeLineCap="round" />
+    <path android:pathData="M33,45 L34,36 Q35,31 39,34 L46,38 Q54,35 62,38 L69,34 Q73,31 74,36 L75,45 C80,51 79,64 76,70 C72,79 63,81 54,81 C45,81 36,79 32,70 C29,64 28,51 33,45 Z" android:fillColor="#FFF1D7" android:strokeColor="#211C33" android:strokeWidth="1.6" android:strokeLineJoin="round" />
+    <path android:pathData="M36,42 L37,36 L43,40 Z M72,42 L71,36 L65,40 Z" android:fillColor="#EED5B4" />
+    <path android:pathData="M35,55 Q39,50 43,55 M65,55 Q69,50 73,55 M50,59 C51,63 54,62 54,59 C54,62 57,63 58,59" android:fillColor="@android:color/transparent" android:strokeColor="#211C33" android:strokeWidth="2.4" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M28,49 Q24,49 23,54 L22,60 Q22,65 27,66 L31,65 L34,50 Z M80,49 Q84,49 85,54 L86,60 Q86,65 81,66 L77,65 L74,50 Z" android:fillColor="#9A86B6" />
+    <path android:pathData="M31,50 L28,65 M77,50 L80,65" android:fillColor="@android:color/transparent" android:strokeColor="#211C33" android:strokeWidth="4.2" android:strokeLineCap="round" />
+    <path android:pathData="M66,64 L66,76 C64,74 60,76 60,78 C60,81 65,81 67,78 L67,68 Q72,69 72,73 Q74,69 70,67 Z" android:fillColor="#211C33" />
+    <path android:pathData="M22,36 L23.5,39.5 L27,41 L23.5,42.5 L22,46 L20.5,42.5 L17,41 L20.5,39.5 Z M86,32 L87,34.5 L89.5,35.5 L87,36.5 L86,39 L85,36.5 L82.5,35.5 L85,34.5 Z" android:fillColor="#FFF0B3" />
+</vector>

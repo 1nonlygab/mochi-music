@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mochi_font_title">Font</string>
+    <string name="mochi_font_description">Choose the app typeface. An active look module can override this choice.</string>
+    <string name="mochi_font_inter">Inter (default)</string>
+    <string name="mochi_font_medieval">Medieval Sharp</string>
+    <string name="mochi_font_serif">Classic serif</string>
+    <string name="mochi_font_mono">Monospace</string>
+    <string name="mochi_download_album">Download album</string>
+    <string name="mochi_album_download_progress">%1$d of %2$d tracks downloaded</string>
+    <string name="mochi_album_downloading">Album download queued</string>
+    <string name="mochi_album_downloaded">Album downloaded</string>
+    <string name="mochi_save_offline_lyrics">Save lyrics for downloads</string>
+    <string name="mochi_lyrics_hint">Find missing lyrics for downloaded songs. Keep Mochi open; an internet connection is needed.</string>
+    <string name="mochi_lyrics_progress">Checking %1$d of %2$d songs…</string>
+    <string name="mochi_lyrics_offline">Stopped without a connection after %1$d of %2$d songs. Connect and retry.</string>
+    <string name="mochi_lyrics_done">%1$d songs have lyrics saved; %2$d unavailable. Retry when online.</string>
+</resources>
