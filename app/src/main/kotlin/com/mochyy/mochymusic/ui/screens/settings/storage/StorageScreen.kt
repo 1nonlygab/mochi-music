@@ -300,6 +300,18 @@ private fun ClearButtons(viewModel: StorageViewModel, downloadCount: Int) {
             enabled = downloadCount > 0,
             onClick = { menuState.showManageDownloadsSheet(viewModel) },
         )
+        val lyrics by viewModel.offlineLyricsProgress.collectAsState()
+        StorageActionButton(
+            label = stringResource(R.string.mochi_save_offline_lyrics),
+            detail = when {
+                lyrics.running -> stringResource(R.string.mochi_lyrics_progress, lyrics.checked, lyrics.total)
+                lyrics.stoppedOffline -> stringResource(R.string.mochi_lyrics_offline, lyrics.checked, lyrics.total)
+                lyrics.total > 0 -> stringResource(R.string.mochi_lyrics_done, lyrics.available, lyrics.unavailable)
+                else -> stringResource(R.string.mochi_lyrics_hint)
+            },
+            enabled = downloadCount > 0 && !lyrics.running,
+            onClick = viewModel::saveDownloadedLyrics,
+        )
     }
 }
 

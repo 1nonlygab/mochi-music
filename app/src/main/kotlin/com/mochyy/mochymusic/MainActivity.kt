@@ -428,8 +428,10 @@ class MainActivity : ComponentActivity() {
             finish()
             return
         }
-        introRequested = savedInstanceState == null && intent?.action == Intent.ACTION_MAIN
-        if (introRequested) LaunchGate.begin() else LaunchGate.skip()
+        // The upstream intro is hard-coded to the old Mochy logo. Use the system splash's
+        // normal fade for the new mascot instead, without holding Home for the old morph.
+        introRequested = false
+        LaunchGate.skip()
         // kept in step with the icon in use, in case it was switched some way other than customisation
         com.mochyy.mochymusic.utils.AppIcons.syncSplash(this)
         // the first start after an import says so once the intro is out of the way

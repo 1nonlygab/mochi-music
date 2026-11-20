@@ -102,6 +102,12 @@ private data class ContributorEntry(
 private val LeadDevs =
     listOf(
         LeadDevEntry(
+            name = "Gab",
+            githubUser = "1nonlygab",
+            devSpaceIndex = 2,
+            fallbackAvatar = R.drawable.ic_launcher_foreground,
+        ),
+        LeadDevEntry(
             name = "Roo",
             githubUser = "realidkroo",
             devSpaceIndex = 0,
@@ -341,7 +347,7 @@ private fun ColumnScope.AboutSheetContent(
     Box(Modifier.fillMaxWidth()) {
         // zero-size layout places the spinning ring behind the top icon without pushing the column down
         VersionRing(
-            text = "MOCHY $installed",
+            text = "MOCHI $installed",
             scrollProgress = { scrollState.value / ringScrollRangePx },
             modifier =
                 Modifier

@@ -74,6 +74,18 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Progress of an explicit, best-effort offline lyrics pass over downloaded songs. */
+data class OfflineLyricsProgress(
+    val running: Boolean = false,
+    val total: Int = 0,
+    val checked: Int = 0,
+    val available: Int = 0,
+    val unavailable: Int = 0,
+    val stoppedOffline: Boolean = false,
+)
+
+private enum class LyricsSaveResult { AVAILABLE, UNAVAILABLE, OFFLINE }
+
 @Singleton
 class DownloadUtil
 @Inject
@@ -380,23 +392,81 @@ constructor(
         else -> "audio/*" to codec?.lowercase().orEmpty()
     }
 
-    /** One lyrics lookup at a time: an album finishing downloading would otherwise ask every provider at once per song. */
+    /** Limit provider work across both automatic downloads and the manual backfill. */
     private val lyricsLock = Mutex()
+    private val _offlineLyricsProgress = MutableStateFlow(OfflineLyricsProgress())
+    val offlineLyricsProgress: StateFlow<OfflineLyricsProgress> = _offlineLyricsProgress.asStateFlow()
 
     /**
-     * A downloaded song's lyrics, saved with it so they're there offline. Lyrics were only ever
-     * fetched when a song played with lyrics on, so a download played offline had none. A song
-     * that already has lyrics keeps them; one saved as "not found" is asked again.
+     * Save available lyrics for already-completed downloads. This runs while the app process is
+     * alive, one song at a time, and can be retried if the connection or a provider fails.
      */
-    private suspend fun saveLyrics(songId: String) {
-        if (OfflineMode.isOn) return
-        lyricsLock.withLock {
-            val stored = database.lyrics(songId).first()
-            if (stored != null && stored.lyrics != LyricsEntity.LYRICS_NOT_FOUND) return
-            val song = database.song(songId).first() ?: return
-            val found = runCatching { lyricsHelper.getLyrics(song.toMediaMetadata()) }.getOrNull() ?: return
-            if (found.provider == LyricsHelper.NoConnectionProvider) return
-            database.query { upsert(LyricsEntity(id = songId, lyrics = found.lyrics, provider = found.provider)) }
+    fun saveDownloadedLyrics() {
+        if (_offlineLyricsProgress.value.running) return
+        val ids = downloads.value.values.filter { it.state == Download.STATE_COMPLETED }
+            .map { it.request.id }.distinct()
+        if (ids.isEmpty()) return
+        _offlineLyricsProgress.value = OfflineLyricsProgress(running = true, total = ids.size)
+        scope.launch {
+            try {
+                for (id in ids) {
+                    if (downloads.value[id]?.state != Download.STATE_COMPLETED) {
+                        _offlineLyricsProgress.update { it.copy(checked = it.checked + 1, unavailable = it.unavailable + 1) }
+                        continue
+                    }
+                    val result = try {
+                        saveLyrics(id)
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        android.util.Log.w(LOG_TAG, "Could not save lyrics for $id", error)
+                        LyricsSaveResult.UNAVAILABLE
+                    }
+                    when (result) {
+                        LyricsSaveResult.OFFLINE -> {
+                            _offlineLyricsProgress.update { it.copy(stoppedOffline = true) }
+                            break
+                        }
+                        LyricsSaveResult.AVAILABLE -> _offlineLyricsProgress.update {
+                            it.copy(checked = it.checked + 1, available = it.available + 1)
+                        }
+                        LyricsSaveResult.UNAVAILABLE -> _offlineLyricsProgress.update {
+                            it.copy(checked = it.checked + 1, unavailable = it.unavailable + 1)
+                        }
+                    }
+                }
+            } finally {
+                _offlineLyricsProgress.update { it.copy(running = false) }
+            }
+        }
+    }
+
+    /** Save successful results only, and never clobber lyrics selected or edited during the lookup. */
+    private suspend fun saveLyrics(songId: String): LyricsSaveResult = lyricsLock.withLock {
+        val stored = database.lyrics(songId).first()
+        if (stored != null && stored.lyrics != LyricsEntity.LYRICS_NOT_FOUND) {
+            return@withLock if (stored.lyrics.isNotBlank()) LyricsSaveResult.AVAILABLE else LyricsSaveResult.UNAVAILABLE
+        }
+        if (OfflineMode.isOn) return@withLock LyricsSaveResult.OFFLINE
+        val song = database.song(songId).first() ?: return@withLock LyricsSaveResult.UNAVAILABLE
+        val found = try {
+            lyricsHelper.getLyrics(song.toMediaMetadata())
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            return@withLock LyricsSaveResult.UNAVAILABLE
+        }
+        if (found.provider == LyricsHelper.NoConnectionProvider) return@withLock LyricsSaveResult.OFFLINE
+        if (found.lyrics.isBlank() || found.lyrics == LyricsEntity.LYRICS_NOT_FOUND) return@withLock LyricsSaveResult.UNAVAILABLE
+        // Room executes this conditional insert/update atomically. A concurrent manual edit wins.
+        val saved = database.saveFetchedLyricsIfMissing(LyricsEntity(id = songId, lyrics = found.lyrics, provider = found.provider))
+        if (saved) return@withLock LyricsSaveResult.AVAILABLE
+        // Another writer won the race. Count it only when real lyrics are now present.
+        val current = database.lyrics(songId).first()
+        if (current != null && current.lyrics.isNotBlank() && current.lyrics != LyricsEntity.LYRICS_NOT_FOUND) {
+            LyricsSaveResult.AVAILABLE
+        } else {
+            LyricsSaveResult.UNAVAILABLE
         }
     }
 

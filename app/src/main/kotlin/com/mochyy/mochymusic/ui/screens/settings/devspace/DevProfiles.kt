@@ -85,6 +85,12 @@ internal val DevPeople = listOf(
         bio = "Hi hello hi",
         avatar = R.drawable.dev_keycii,
     ),
+    DevPerson(
+        name = "Gab",
+        bio = "Mochi developer",
+        avatar = R.drawable.ic_launcher_foreground,
+        socials = listOf(DevSocial("GitHub", "https://github.com/1nonlygab")),
+    ),
 )
 
 /** someone's picture, round, on the mock's light grey */

@@ -2068,6 +2068,19 @@ interface DatabaseDao {
     @Upsert
     fun upsert(lyrics: LyricsEntity)
 
+    // Download prefetch must never replace a source or an edit chosen while the network was busy.
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertLyricsIfAbsent(lyrics: LyricsEntity): Long
+
+    @Query("UPDATE lyrics SET lyrics = :text, provider = :provider WHERE id = :id AND lyrics = :notFound")
+    fun replaceMissingLyrics(id: String, text: String, provider: String, notFound: String): Int
+
+    @Transaction
+    fun saveFetchedLyricsIfMissing(lyrics: LyricsEntity): Boolean {
+        if (insertLyricsIfAbsent(lyrics) != -1L) return true
+        return replaceMissingLyrics(lyrics.id, lyrics.lyrics, lyrics.provider, LyricsEntity.LYRICS_NOT_FOUND) > 0
+    }
+
     @Upsert
     fun upsert(format: FormatEntity)
 

@@ -98,6 +98,8 @@ class StorageViewModel @Inject constructor(
 
     val moveStep: StateFlow<MoveStep> = mover.step
     val exportStep: StateFlow<ExportStep> = exporter.step
+    val offlineLyricsProgress = downloadUtil.offlineLyricsProgress
+    fun saveDownloadedLyrics() = downloadUtil.saveDownloadedLyrics()
 
     private val _usage = MutableStateFlow<StorageUsage?>(null)
     val usage: StateFlow<StorageUsage?> = _usage.asStateFlow()

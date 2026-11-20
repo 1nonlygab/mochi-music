@@ -116,7 +116,6 @@ fun AlbumScreen(
     val database = LocalDatabase.current
     val context = LocalContext.current
     val downloadUtil = LocalDownloadUtil.current
-    val downloads by downloadUtil.downloads.collectAsState()
     val syncUtils = LocalSyncUtils.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -316,6 +315,8 @@ fun AlbumScreen(
         // Queue the complete album with one tap. Already queued or downloaded tracks are left alone;
         // failed or missing tracks can be retried without removing the rest of the album.
         if (!isSearching && !album.album.isLocal) item(key = "album_download") {
+            // Download progress changes frequently; only this small item needs to redraw.
+            val downloads by downloadUtil.downloads.collectAsState()
             val tracks = album.songs
             val completed = tracks.count { downloads[it.id]?.state == Download.STATE_COMPLETED }
             val missing = tracks.filter { song ->
