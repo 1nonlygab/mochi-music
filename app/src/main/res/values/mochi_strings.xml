@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mochi_font_title">Font</string>
+    <string name="mochi_font_description">Choose the app typeface. An active look module can override this choice.</string>
+    <string name="mochi_font_inter">Inter (default)</string>
+    <string name="mochi_font_medieval">Medieval Sharp</string>
+    <string name="mochi_font_serif">Classic serif</string>
+    <string name="mochi_font_mono">Monospace</string>
+    <string name="mochi_download_album">Download album</string>
+    <string name="mochi_album_download_progress">%1$d of %2$d tracks downloaded</string>
+    <string name="mochi_album_downloading">Album download queued</string>
+    <string name="mochi_album_downloaded">Album downloaded</string>
+</resources>
